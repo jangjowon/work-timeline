@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Work Timeline — 구조 프리뷰</title>
+
+  <!--
+    =========================================================================
+    ■ 이 파일의 목적
+    =========================================================================
+    PRD 기반 개인 업무 포트폴리오 사이트의 "구조 프리뷰"입니다.
+    아직 기능(정렬, 링크 이동, 다크모드, 라이트박스 등)은 구현하지 않고
+    섹션 배치와 시각적 흐름만 확인하기 위한 버전입니다.
+
+    각 섹션에는 고유한 id(`section-xxx`)와 주석을 달아두었으니,
+    수정 요청 시 섹션 이름으로 지시하면 됩니다.
+    예: "section-timeline-feed의 카드 간격을 줄여줘"
+    =========================================================================
+  -->
+
+  <style>
+    /* =========================================================
+       [design-tokens] 디자인 토큰
+       - 따뜻한 블로그 톤 + Emerald 강조색
+       - 나중에 이 변수만 바꾸면 전체 톤 변경 가능
+       ========================================================= */
+    :root {
+      /* 배경 — 따뜻한 오프화이트 계열 */
+      --bg:           #FAF8F4;
+      --bg-elevated: #FFFFFF;
+      --bg-muted:    #F1EDE5;
+
+      /* 텍스트 */
+      --text-primary:   #2B2A27;
+      --text-secondary: #6B6862;
+      --text-muted:     #9A958C;
+
+      /* 보더 */
+      --border:        #E8E2D6;
+      --border-strong: #D8D0BF;
+
+      /* 강조색 — Emerald, 따뜻한 톤에 맞춰 약간 채도 낮춤 */
+      --accent:       #059669;
+      --accent-hover: #047857;
+      --accent-soft:  #D1FAE5;
+
+      /* 타이포그래피 */
+      --font-sans: -apple-system, BlinkMacSystemFont, "Pretendard",
+                   "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      --font-serif: "Iowan Old Style", "Apple Garamond", Baskerville, serif;
+
+      /* 여백 스케일 */
+      --space-card-gap: 56px;
+      --content-max:    720px;
+    }
+
+    /* =========================================================
+       [base-reset] 기본 리셋
+       ========================================================= */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-sans);
+      font-size: 17px;
+      line-height: 1.7;
+      color: var(--text-primary);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    img { max-width: 100%; display: block; }
+
+    /* =========================================================
+       [layout-container] 콘텐츠 중앙 정렬 컨테이너
+       ========================================================= */
+    .container {
+      max-width: var(--content-max);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* =========================================================
+       [section-nav] 상단 네비게이션
+       - sticky, 얇은 보더
+       - 좌측: 사이트명 / 우측: 링크 (About, RSS)
+       ========================================================= */
+    #section-nav {
+      position: sticky;
+      top: 0;
+      background: rgba(250, 248, 244, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      z-index: 50;
+    }
+    #section-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    #section-nav .brand {
+      font-weight: 600;
+      font-size: 16px;
+      letter-spacing: -0.01em;
+    }
+    #section-nav .nav-links {
+      display: flex;
+      gap: 24px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    #section-nav .nav-links a:hover { color: var(--accent); }
+
+    /* =========================================================
+       [section-profile-header] 프로필 헤더
+       - 이름, 한 줄 소개, SNS 링크
+       - 홈 상단의 개인 브랜딩 영역
+       ========================================================= */
+    #section-profile-header {
+      padding: 80px 0 48px;
+      border-bottom: 1px solid var(--border);
+    }
+    #section-profile-header .avatar {
+      width: 96px; height: 96px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+      background: var(--bg-muted);
+    }
+    #section-profile-header .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+    #section-profile-header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    #section-profile-header .tagline {
+      font-size: 17px;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+    }
+
+    /* [bio-list] 약력 리스트
+       - 연도 + 내용의 2열 구성
+       - 간결하게 나열하여 "이 사람이 뭘 해왔는지"를 한눈에 */
+    #section-profile-header .bio-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 15px;
+      line-height: 1.6;
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+    }
+    #section-profile-header .bio-item {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 16px;
+      align-items: baseline;
+    }
+    #section-profile-header .bio-year {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.02em;
+    }
+    #section-profile-header .bio-text {
+      color: var(--text-secondary);
+    }
+    #section-profile-header .bio-text strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    @media (max-width: 600px) {
+      #section-profile-header .bio-item {
+        grid-template-columns: 70px 1fr;
+        gap: 12px;
+      }
+    }
+
+    /* =========================================================
+       [section-timeline-feed] 메인 타임라인 피드
+       - 월별 그룹핑, 최신 순
+       ========================================================= */
+    #section-timeline-feed {
+      padding: 48px 0 120px;
+    }
+
+    /* 월 구분선 (month anchor) */
+    .month-anchor {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 48px 0 32px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .month-anchor::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .month-anchor:first-child { margin-top: 0; }
+
+    /* =========================================================
+       [component-post-card] 포스트 카드
+       - 날짜 > 제목 > 이미지 > 설명 > 태그 순서
+       - 날짜가 제목보다 먼저 눈에 들어오도록
+       ========================================================= */
+    .post-card {
+      margin-bottom: var(--space-card-gap);
+    }
+    .post-card .post-date {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 10px;
+      letter-spacing: 0.01em;
+    }
+    .post-card .post-title {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.35;
+      letter-spacing: -0.015em;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .post-card .post-title a {
+      display: inline;
+      background-image: linear-gradient(var(--accent), var(--accent));
+      background-size: 0% 1px;
+      background-repeat: no-repeat;
+      background-position: 0 100%;
+      transition: background-size 0.25s ease;
+    }
+    .post-card .post-title a:hover {
+      background-size: 100% 1px;
+    }
+    .post-card .post-cover {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: var(--bg-muted);
+      border-radius: 8px;
+      margin-bottom: 16px;
+      overflow: hidden;
+
+      /* 플레이스홀더 이미지 영역 표시 */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      border: 1px solid var(--border);
+    }
+    .post-card .post-excerpt {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    .post-card .post-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .post-card .post-tags .tag {
+      font-size: 13px;
+      color: var(--text-muted);
+      padding: 4px 10px;
+      background: var(--bg-muted);
+      border-radius: 999px;
+    }
+
+    /* =========================================================
+       [section-empty-state] 빈 상태 (포스트 0개일 때)
+       - 현재는 구조 확인용으로 숨겨두었음 (display: none)
+       ========================================================= */
+    #section-empty-state {
+      display: none; /* 샘플 카드가 있으므로 숨김 */
+      padding: 80px 0;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    /* =========================================================
+       [section-footer] 하단 푸터
+       ========================================================= */
+    #section-footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    #section-footer .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* =========================================================
+       [responsive] 모바일 대응
+       ========================================================= */
+    @media (max-width: 600px) {
+      body { font-size: 16px; }
+      #section-profile-header { padding: 56px 0 36px; }
+      #section-profile-header h1 { font-size: 26px; }
+      .post-card .post-title { font-size: 21px; }
+      :root { --space-card-gap: 44px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================================================
+       [section-nav] 상단 네비게이션
+       ========================================================= -->
+  <nav id="section-nav">
+    <div class="container nav-inner">
+      <div class="brand">Work Timeline</div>
+      <div class="nav-links">
+        <a href="#">About</a>
+        <a href="#">RSS</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- =========================================================
+       [section-profile-header] 프로필 헤더
+       ========================================================= -->
+  <header id="section-profile-header">
+    <div class="container">
+      <div class="avatar">
+        <img src="images/profile.jpg" alt="Jowon Jang" />
+      </div>
+      <h1>Jowon Jang</h1>
+      <p class="tagline">매일의 작업을 기록하는 공간입니다.</p>
+
+      <!-- [bio-list] 약력
+           - bio-item을 추가/수정하여 자유롭게 갱신
+           - 최신 항목이 위로 오도록 정렬 권장 -->
+      <div class="bio-list">
+        <div class="bio-item">
+          <div class="bio-year">2026 — 현재</div>
+          <div class="bio-text"><strong>전남 고흥군보건소</strong> · 공중보건의사</div>
+        </div>
+        <div class="bio-item">
+          <div class="bio-year">2025 — 현재</div>
+          <div class="bio-text"><strong>경희대학교 한방응용의학과</strong> · 석박사통합과정</div>
+        </div>
+        <div class="bio-item">
+          <div class="bio-year">2025 — 2026</div>
+          <div class="bio-text"><strong>김한샘봄한의원</strong> · 진료원장</div>
+        </div>
+        <div class="bio-item">
+          <div class="bio-year">2019 — 2025</div>
+          <div class="bio-text"><strong>경희대학교 한의과대학</strong> · 학사</div>
+        </div>
+        <div class="bio-item">
+          <div class="bio-year">관심 분야</div>
+          <div class="bio-text">근거 기반 진료를 통한 환자 삶의 질 향상, 그리고 한의학이 일상 속에서 자연스럽게 닿는 의학이 되도록 하는 대중화 활동</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================
+       [section-timeline-feed] 메인 타임라인 피드
+       - 월 그룹 → 포스트 카드들
+       - 최신 월이 최상단
+       ========================================================= -->
+  <main id="section-timeline-feed">
+    <div class="container">
+
+      <!-- [month-group] 2026년 4월 -->
+      <div class="month-anchor">2026년 4월</div>
+
+      <!-- [component-post-card] 샘플 카드 1 -->
+      <article class="post-card">
+        <div class="post-date">4월 22일 (수)</div>
+        <h2 class="post-title">
+          <a href="#">프로젝트 A 신규 기능 개발</a>
+        </h2>
+        <div class="post-cover">[cover image placeholder]</div>
+        <p class="post-excerpt">
+          새로운 대시보드 기능의 프로토타입을 완성했습니다. 사용자 피드백을
+          빠르게 반영할 수 있도록 컴포넌트를 모듈화했고, 접근성 테스트까지
+          1차 완료했습니다.
+        </p>
+        <div class="post-tags">
+          <span class="tag">#frontend</span>
+          <span class="tag">#react</span>
+        </div>
+      </article>
+
+      <!-- [component-post-card] 샘플 카드 2 -->
+      <article class="post-card">
+        <div class="post-date">4월 21일 (화)</div>
+        <h2 class="post-title">
+          <a href="#">디자인 시스템 토큰 리팩터링</a>
+        </h2>
+        <div class="post-cover">[cover image placeholder]</div>
+        <p class="post-excerpt">
+          색상과 간격 토큰을 재정비하고, 다크모드 대응을 위한 semantic 토큰
+          레이어를 추가했습니다.
+        </p>
+        <div class="post-tags">
+          <span class="tag">#design-system</span>
+        </div>
+      </article>
+
+      <!-- [component-post-card] 샘플 카드 3 -->
+      <article class="post-card">
+        <div class="post-date">4월 19일 (일)</div>
+        <h2 class="post-title">
+          <a href="#">주간 회고 및 다음 주 계획</a>
+        </h2>
+        <!-- 커버 이미지가 없는 카드 예시 -->
+        <p class="post-excerpt">
+          한 주 동안 진행한 업무를 정리하고, 다음 주 우선순위를 다시 정렬했습니다.
+          집중해야 할 작업 세 가지를 선정했습니다.
+        </p>
+        <div class="post-tags">
+          <span class="tag">#retrospective</span>
+        </div>
+      </article>
+
+      <!-- [month-group] 2026년 3월 -->
+      <div class="month-anchor">2026년 3월</div>
+
+      <!-- [component-post-card] 샘플 카드 4 -->
+      <article class="post-card">
+        <div class="post-date">3월 30일 (월)</div>
+        <h2 class="post-title">
+          <a href="#">분기 마감 리포트 작성</a>
+        </h2>
+        <div class="post-cover">[cover image placeholder]</div>
+        <p class="post-excerpt">
+          1분기 업무 성과를 정리하고, 주요 지표 변화를 시각화했습니다.
+        </p>
+        <div class="post-tags">
+          <span class="tag">#report</span>
+          <span class="tag">#data</span>
+        </div>
+      </article>
+
+      <!-- [component-post-card] 샘플 카드 5 -->
+      <article class="post-card">
+        <div class="post-date">3월 15일 (일)</div>
+        <h2 class="post-title">
+          <a href="#">새로운 에디터 도구 실험</a>
+        </h2>
+        <p class="post-excerpt">
+          마크다운 작성 워크플로를 개선하기 위해 몇 가지 도구를 비교 실험했습니다.
+        </p>
+        <div class="post-tags">
+          <span class="tag">#tools</span>
+        </div>
+      </article>
+
+    </div>
+  </main>
+
+  <!-- =========================================================
+       [section-empty-state] 포스트가 하나도 없을 때의 상태
+       - 현재는 샘플 카드가 있으므로 display: none 처리
+       ========================================================= -->
+  <section id="section-empty-state">
+    <div class="container">
+      <p>아직 작성된 포스트가 없습니다.</p>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       [section-footer] 푸터
+       ========================================================= -->
+  <footer id="section-footer">
+    <div class="container footer-inner">
+      <div>© 2026 Your Name</div>
+      <div><a href="#">RSS</a></div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node scripts/generate-posts-manifest.mjs)",
+      "Bash(PORT=3010 npm run start)",
+      "Bash(curl -sS -o /tmp/og-root.png -w \"HTTP %{http_code}  CT=%{content_type}  size=%{size_download}\\\\n\" http://localhost:3010/opengraph-image)",
+      "Bash(curl -sS -o /tmp/og-post.png -w \"HTTP %{http_code}  CT=%{content_type}  size=%{size_download}\\\\n\" http://localhost:3010/posts/okr-quarterly-review/opengraph-image)",
+      "Bash(curl -sS http://localhost:3010/ -o /tmp/h.html -w \"HTTP %{http_code}\\\\n\")",
+      "Read(//tmp/**)",
+      "Bash(curl -sS http://localhost:3010/posts/okr-quarterly-review -o /tmp/p.html -w \"HTTP %{http_code}\\\\n\")",
+      "Bash(node scripts/new-post.mjs --help)",
+      "Bash(node scripts/new-post.mjs \"테스트 제목\" --slug test-post --no-open --tag 테스트)",
+      "Bash(node scripts/new-post.mjs \"테스트 제목\" --slug test-post --no-open)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(node scripts/new-post.mjs \"Quarterly review\" --no-open)"
+    ]
+  }
+}
