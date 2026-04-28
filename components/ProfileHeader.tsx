@@ -45,13 +45,13 @@ export default function ProfileHeader() {
           </div>
 
           {/* 우측: 약력 */}
-          <div className="flex flex-col gap-2.5 border-t border-line pt-6 text-[15px] leading-relaxed md:border-t-0 md:pt-0">
+          <div className="flex flex-col gap-4 border-t border-line pt-6 text-[15px] leading-relaxed sm:gap-2.5 md:border-t-0 md:pt-0">
             {profile.bio.map((item, i) => (
               <div
                 key={i}
-                className="grid grid-cols-[70px_1fr] items-baseline gap-3 sm:grid-cols-[90px_1fr] sm:gap-4"
+                className="grid grid-cols-1 items-baseline gap-0.5 sm:grid-cols-[90px_1fr] sm:gap-4"
               >
-                <div className="text-[13px] font-semibold tracking-wide text-accent">
+                <div className="whitespace-nowrap text-[13px] font-semibold tracking-wide text-accent">
                   {item.year}
                 </div>
                 <div className="text-ink-secondary">
